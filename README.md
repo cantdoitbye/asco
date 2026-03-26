@@ -130,3 +130,11 @@ ooumph-asco/
 ## License
 
 MIT License
+
+
+
+Default users created:
+  - admin@asco.gov / password123 (State Admin)
+  - dpo@asco.gov / password123 (District Admin)
+  - supervisor@asco.gov / password123 (Block Supervisor)
+  - aww@asco.gov / password123 (AWW)

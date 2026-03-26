@@ -15,6 +15,12 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [apiError, setApiError] = useState('')
+  const demoUsers = [
+    { label: 'State Admin', email: 'admin@asco.gov', password: 'password123' },
+    { label: 'District Admin', email: 'dpo@asco.gov', password: 'password123' },
+    { label: 'Block Supervisor', email: 'supervisor@asco.gov', password: 'password123' },
+    { label: 'AWW', email: 'aww@asco.gov', password: 'password123' },
+  ]
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -65,6 +71,28 @@ export default function Login() {
         </div>
 
         <div className="card p-6">
+          <div className="mb-4">
+            <p className="mb-2 text-sm font-medium text-gray-700">Quick fill demo users</p>
+            <div className="grid grid-cols-2 gap-2">
+              {demoUsers.map((u) => (
+                <button
+                  key={u.email}
+                  type="button"
+                  onClick={() => {
+                    setEmail(u.email)
+                    setPassword(u.password)
+                    setErrors({})
+                    setApiError('')
+                  }}
+                  className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+                  disabled={isLoading}
+                >
+                  <span className="font-medium text-gray-800">{u.label}</span>
+                  <span className="text-xs text-gray-500">{u.email}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           {apiError && (
             <div className="mb-4 flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
