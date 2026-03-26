@@ -1,0 +1,19 @@
+# Environments
+.env
+.env.*
+!.env.example
+.venv
+env/
+venv/
+
+# Editor
+.idea/
+.vscode/
+.trae/
+
+# OS
+.DS_Store
+
+# Misc
+*.pdf
+Pasted markdown.md

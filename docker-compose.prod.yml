@@ -1,66 +1,63 @@
+version: '3.8'
+
 services:
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3081:80"
+      - "${FRONTEND_PORT:-3081}:80"
+    environment:
+      - VITE_API_URL=http://135.222.42.174:${BACKEND_PORT:-8081}/api/v1
     depends_on:
       - backend
     networks:
       - asco-network
+    restart: unless-stopped
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8081:8000"
+      - "${BACKEND_PORT:-8081}:8000"
     environment:
-      - DATABASE_URL=postgresql://admin:password@db:5432/ooumph_shakti
+      - DATABASE_URL=postgresql://admin:password@db:5432/asco
       - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-super-secret-key-change-in-production
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    command: >
+      bash -c "alembic upgrade head && python -m app.seeders.seed_all && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    volumes:
-      - ./backend:/app
+      - db
+      - redis
     networks:
       - asco-network
+    restart: unless-stopped
 
   db:
     image: postgres:15-alpine
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=ooumph_shakti
+      - POSTGRES_DB=asco
     ports:
-      - "5481:5432"
+      - "${POSTGRES_PORT:-5481}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d ooumph_shakti"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     networks:
       - asco-network
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6381:6379"
+      - "${REDIS_PORT:-6381}:6379"
     volumes:
       - redis_data:/data
     networks:
       - asco-network
-
-volumes:
-  postgres_data:
-  redis_data:
+    restart: unless-stopped
 
 networks:
   asco-network:

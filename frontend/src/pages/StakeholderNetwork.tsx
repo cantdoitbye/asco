@@ -216,7 +216,7 @@ export default function StakeholderNetwork() {
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <p className="text-sm text-gray-600">Avg Connections</p>
-            <p className="text-2xl font-bold text-gray-900">{networkData.stats.avg_connections?.toFixed?.toFixed(1) || '0.0'}</p>
+            <p className="text-2xl font-bold text-gray-900">{typeof networkData.stats.avg_connections === 'number' ? networkData.stats.avg_connections.toFixed(1) : '0.0'}</p>
           </div>
         </div>
       )}
