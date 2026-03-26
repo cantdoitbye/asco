@@ -73,7 +73,7 @@ export default function Login() {
         <div className="card p-6">
           <div className="mb-4">
             <p className="mb-2 text-sm font-medium text-gray-700">Quick fill demo users</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               {demoUsers.map((u) => (
                 <button
                   key={u.email}
@@ -84,11 +84,16 @@ export default function Login() {
                     setErrors({})
                     setApiError('')
                   }}
-                  className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+                  className="w-full rounded-md border border-gray-200 bg-white p-3 text-left hover:bg-gray-50"
                   disabled={isLoading}
                 >
-                  <span className="font-medium text-gray-800">{u.label}</span>
-                  <span className="text-xs text-gray-500">{u.email}</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-800">{u.label}</p>
+                      <p className="text-xs text-gray-500 break-words" title={u.email}>{u.email}</p>
+                    </div>
+                    <span className="text-xs font-medium text-primary-600">Fill</span>
+                  </div>
                 </button>
               ))}
             </div>
