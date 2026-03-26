@@ -45,18 +45,18 @@ def seed_blocks(db: Session, districts):
     
     for district in districts:
         for bd in blocks_data:
+            target_code = f"{district.code}-{bd['code']}"
             existing = db.query(Block).filter(
-                Block.code == bd["code"],
+                Block.code == target_code,
                 Block.district_id == district.id
             ).first()
             if not existing:
                 block = Block(
                     name=f"{district.name} {bd['name']}",
-                    code=f"{district.code}-{bd['code']}",
+                    code=target_code,
                     district_id=district.id
                 )
                 db.add(block)
-    
     db.commit()
     return db.query(Block).all()
 
@@ -65,17 +65,17 @@ def seed_villages(db: Session, blocks):
     villages = []
     for block in blocks:
         for i in range(1, 4):
+            target_name = f"Village {i} - {block.name}"
             existing = db.query(Village).filter(
                 Village.block_id == block.id,
-                Village.name == f"Village {i}"
+                Village.name == target_name
             ).first()
             if not existing:
                 village = Village(
-                    name=f"Village {i} - {block.name}",
+                    name=target_name,
                     block_id=block.id
                 )
                 db.add(village)
-    
     db.commit()
     return db.query(Village).all()
 
@@ -84,14 +84,16 @@ def seed_anganwadi_centers(db: Session, villages):
     centers = []
     for village in villages:
         for i in range(1, 3):
-                code = f"AWC-{random_string(6)}"
+                target_name = f"Anganwadi Center {i} - {village.name}"
                 existing = db.query(AnganwadiCenter).filter(
-                    AnganwadiCenter.code == code
+                    AnganwadiCenter.name == target_name,
+                    AnganwadiCenter.village_id == village.id
                 ).first()
                 if not existing:
+                    code = f"AWC-{random_string(6)}"
                     center = AnganwadiCenter(
                         code=code,
-                        name=f"Anganwadi Center {i} - {village.name}",
+                        name=target_name,
                         village_id=village.id,
                         address=f"Address {i}, {village.name}",
                         latitude=17.3 + random.uniform(-0.5, 0.5),
@@ -107,6 +109,8 @@ def seed_anganwadi_centers(db: Session, villages):
                     )
                     db.add(center)
                     centers.append(center)
+                else:
+                    centers.append(existing)
     
     db.commit()
     return centers
