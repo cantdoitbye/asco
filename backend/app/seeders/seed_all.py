@@ -74,6 +74,7 @@ def seed_villages(db: Session, blocks):
             if not existing:
                 village = Village(
                     name=target_name,
+                    code=f"{block.code}-V{i}",
                     block_id=block.id
                 )
                 db.add(village)
