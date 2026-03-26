@@ -131,8 +131,8 @@ def seed_warehouses(db: Session, districts):
                 code=f"WH-{district.code}",
                 district_id=district.id,
                 address=f"Industrial Area, {district.name}",
-                capacity_kg=100000,
-                current_utilization=random.uniform(20, 60)
+                capacity_mt=1000,
+                is_active=True
             )
             db.add(warehouse)
             warehouses.append(warehouse)
@@ -143,10 +143,10 @@ def seed_warehouses(db: Session, districts):
 
 def seed_suppliers(db: Session):
     suppliers_data = [
-        {"name": "ABC Traders", "code": "SUP-001", "category": "food_grains"},
-        {"name": "XYZ Foods", "code": "SUP-002", "category": "dairy"},
-        {"name": "Quality Supplies", "code": "SUP-003", "category": "nutrition"},
-        {"name": "Health Foods India", "code": "SUP-004", "category": "supplements"},
+        {"name": "ABC Traders", "code": "SUP-001"},
+        {"name": "XYZ Foods", "code": "SUP-002"},
+        {"name": "Quality Supplies", "code": "SUP-003"},
+        {"name": "Health Foods India", "code": "SUP-004"},
     ]
     
     suppliers = []
@@ -156,12 +156,10 @@ def seed_suppliers(db: Session):
             supplier = Supplier(
                 name=sd["name"],
                 code=sd["code"],
-                category=sd["category"],
                 contact_person=f"Contact {random_string(4)}",
                 phone=f"+91{random.randint(7000000000, 9999999999)}",
                 email=f"contact@{sd['name'].lower().replace(' ', '')}.com",
                 address=f"Business Park, {sd['name']}",
-                quality_rating=random.uniform(3.5, 4.8),
                 is_active=True
             )
             db.add(supplier)
@@ -173,10 +171,10 @@ def seed_suppliers(db: Session):
 
 def seed_users(db: Session):
     users_data = [
-        {"email": "admin@asco.gov", "username": "admin", "role": "admin", "full_name": "System Administrator"},
-        {"email": "dpo@asco.gov", "username": "dpo_hyd", "role": "district_program_officer", "full_name": "District Program Officer"},
-        {"email": "manager@asco.gov", "username": "manager", "role": "supply_chain_manager", "full_name": "Supply Chain Manager"},
-        {"email": "viewer@asco.gov", "username": "viewer", "role": "viewer", "full_name": "Report Viewer"},
+        {"email": "admin@asco.gov", "full_name": "System Administrator", "role": UserRole.STATE_ADMIN},
+        {"email": "dpo@asco.gov", "full_name": "District Program Officer", "role": UserRole.DISTRICT_ADMIN},
+        {"email": "supervisor@asco.gov", "full_name": "Block Supervisor", "role": UserRole.BLOCK_SUPERVISOR},
+        {"email": "aww@asco.gov", "full_name": "Anganwadi Worker", "role": UserRole.AWW},
     ]
     
     for ud in users_data:
@@ -184,7 +182,6 @@ def seed_users(db: Session):
         if not existing:
             user = User(
                 email=ud["email"],
-                username=ud["username"],
                 hashed_password=get_password_hash("password123"),
                 role=ud["role"],
                 full_name=ud["full_name"],
@@ -197,59 +194,45 @@ def seed_users(db: Session):
 
 
 def seed_inventory(db: Session, warehouses):
-    items = [
-        {"item_id": 1, "item_name": "Rice", "quantity": random.uniform(5000, 10000), "unit": "kg", "min_threshold": 2000},
-        {"item_id": 2, "item_name": "Wheat", "quantity": random.uniform(3000, 8000), "unit": "kg", "min_threshold": 1500},
-        {"item_id": 3, "item_name": "Pulses", "quantity": random.uniform(1000, 3000), "unit": "kg", "min_threshold": 500},
-        {"item_id": 4, "item_name": "Oil", "quantity": random.uniform(500, 1500), "unit": "liters", "min_threshold": 300},
-        {"item_id": 5, "item_name": "Sugar", "quantity": random.uniform(800, 2000), "unit": "kg", "min_threshold": 400},
-        {"item_id": 6, "item_name": "Milk Powder", "quantity": random.uniform(200, 600), "unit": "kg", "min_threshold": 100},
-    ]
+    if not warehouses:
+        return
     
     for warehouse in warehouses:
-        for item in items:
-            existing = db.query(Inventory).filter(
-                Inventory.warehouse_id == warehouse.id,
-                Inventory.item_id == item["item_id"]
-            ).first()
-            if not existing:
-                inventory = Inventory(
-                    warehouse_id=warehouse.id,
-                    item_id=item["item_id"],
-                    quantity=item["quantity"],
-                    unit=item["unit"],
-                    min_threshold=item["min_threshold"]
-                )
-                db.add(inventory)
+        existing = db.query(Inventory).filter(
+            Inventory.warehouse_id == warehouse.id
+        ).first()
+        if not existing:
+            inventory = Inventory(
+                item_id=1,
+                warehouse_id=warehouse.id,
+                quantity=random.uniform(500, 5000),
+                min_threshold=100,
+                max_threshold=10000
+            )
+            db.add(inventory)
     
     db.commit()
 
 
 def seed_deliveries(db: Session, warehouses, centers):
-    statuses = ["delivered", "in_transit", "pending", "scheduled", "delayed"]
-    
     if not warehouses or not centers:
         return
     
-    for i in range(20):
+    for i in range(10):
         warehouse = random.choice(warehouses)
         center = random.choice(centers)
-        
+        tracking_code = f"DEL-{random_string(8)}"
         existing = db.query(Delivery).filter(
-            Delivery.tracking_number == f"DEL-{random_string(8)}"
+            Delivery.tracking_code == tracking_code
         ).first()
-        
         if not existing:
-            status = random.choice(statuses)
             delivery = Delivery(
-                tracking_number=f"DEL-{random_string(8)}",
+                tracking_code=tracking_code,
                 warehouse_id=warehouse.id,
-                destination_type="anganwadi_center",
-                destination_id=center.id,
-                status=status,
+                anganwadi_center_id=center.id,
+                status=random.choice(["pending", "in_transit", "delivered"]),
                 scheduled_date=datetime.utcnow() + timedelta(days=random.randint(-5, 10)),
                 total_weight_kg=random.uniform(100, 500),
-                created_at=datetime.utcnow() - timedelta(days=random.randint(0, 10))
             )
             db.add(delivery)
     
@@ -285,25 +268,9 @@ def seed_grievances(db: Session, users):
     db.commit()
 
 
-def seed_trust_scores(db: Session, suppliers):
-    for supplier in suppliers:
-        existing = db.query(TrustScore).filter(
-            TrustScore.entity_type == "supplier",
-            TrustScore.entity_id == supplier.id
-        ).first()
-        
-        if not existing:
-            trust_score = TrustScore(
-                entity_type="supplier",
-                entity_id=supplier.id,
-                score=random.uniform(3.0, 5.0),
-                zone=random.choice(["green", "yellow", "red"]),
-                components={"on_time_delivery": random.uniform(0.7, 0.95), "quality": random.uniform(0.7, 0.95)},
-                last_updated=datetime.utcnow()
-            )
-            db.add(trust_score)
-    
-    db.commit()
+def seed_trust_scores(db: Session, users):
+    # Trust scores require a stakeholder_id, skip if no stakeholders exist
+    pass
 
 
 def seed_all():
@@ -358,10 +325,10 @@ def seed_all():
         
         print("\nDatabase seeding completed successfully!")
         print("\nDefault users created:")
-        print("  - admin@asco.gov / password123 (Admin)")
-        print("  - dpo@asco.gov / password123 (District Program Officer)")
-        print("  - manager@asco.gov / password123 (Supply Chain Manager)")
-        print("  - viewer@asco.gov / password123 (Viewer)")
+        print("  - admin@asco.gov / password123 (State Admin)")
+        print("  - dpo@asco.gov / password123 (District Admin)")
+        print("  - supervisor@asco.gov / password123 (Block Supervisor)")
+        print("  - aww@asco.gov / password123 (AWW)")
         
     except Exception as e:
         print(f"Error during seeding: {e}")
