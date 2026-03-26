@@ -5,7 +5,7 @@ import asyncio
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine
 from app.models import (
-    Base, User, District, Block, Village, AnganwadiCenter,
+    Base, User, UserRole, District, Block, Village, AnganwadiCenter,
     Warehouse, Supplier, Inventory, Delivery, Grievance, TrustScore
 )
 from app.services.auth import get_password_hash
