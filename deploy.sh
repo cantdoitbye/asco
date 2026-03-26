@@ -49,15 +49,20 @@ export BACKEND_PORT
 export POSTGRES_PORT
 export REDIS_PORT
 
-
+echo ""
+echo "Creating .env file from example..."
+if [ ! -f ".env" ]; then
+    cp .env.example .env
+    echo "Please edit .env file with your production settings including OPENAI_API_KEY"
+fi
 
 echo ""
 echo "Stopping any existing containers..."
-docker-compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
+docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
 
 echo ""
 echo "Building and starting containers..."
-docker-compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build
 
 echo ""
 echo "Waiting for services to be ready..."
@@ -65,11 +70,11 @@ sleep 10
 
 echo ""
 echo "Running database migrations..."
-docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
+docker compose -f docker-compose.prod.yml exec backend alembic upgrade head
 
 echo ""
 echo "Running database seeders..."
-docker-compose -f docker-compose.prod.yml exec backend python -m app.seeders.seed_all
+docker compose -f docker-compose.prod.yml exec backend python -m app.seeders.seed_all
 
 echo ""
 echo "=========================================="
@@ -82,8 +87,8 @@ echo "  Backend API: http://${SERVER_IP}:${BACKEND_PORT}"
 echo "  API Docs: http://${SERVER_IP}:${BACKEND_PORT}/docs"
 echo ""
 echo "To view logs:"
-echo "  docker-compose -f docker-compose.prod.yml logs -f"
+echo "  docker compose -f docker-compose.prod.yml logs -f"
 echo ""
 echo "To stop services:"
-echo "  docker-compose -f docker-compose.prod.yml down"
+echo "  docker compose -f docker-compose.prod.yml down"
 echo "=========================================="
