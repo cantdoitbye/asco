@@ -4,10 +4,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://135.222.42.174:${BACKEND_PORT:-8081}/api/v1}
     ports:
       - "${FRONTEND_PORT:-3081}:80"
     environment:
-      - VITE_API_URL=http://135.222.42.174:${BACKEND_PORT:-8081}/api/v1
+      - VITE_API_URL=${VITE_API_URL:-http://135.222.42.174:${BACKEND_PORT:-8081}/api/v1}
     depends_on:
       - backend
     networks:
