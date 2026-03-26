@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
     
-    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
+    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173", "http://135.222.42.174:3081"]
     
     class Config:
         env_file = ".env"
