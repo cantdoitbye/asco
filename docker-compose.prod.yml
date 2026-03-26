@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   frontend:
@@ -62,3 +61,7 @@ services:
 networks:
   asco-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
