@@ -57,6 +57,7 @@ def seed_blocks(db: Session, districts):
                     district_id=district.id
                 )
                 db.add(block)
+    
     db.commit()
     return db.query(Block).all()
 
@@ -76,6 +77,7 @@ def seed_villages(db: Session, blocks):
                     block_id=block.id
                 )
                 db.add(village)
+    
     db.commit()
     return db.query(Village).all()
 
